@@ -13,6 +13,18 @@ firebase.initializeApp(firebaseConfig);
 var database = firebase.database();
 
 $(document).ready(function(){
+    database.ref().on("child_added",function(snapshot){
+        console.log("Snapshot : "+snapshot.val().name);
+        var table = $("<tr>");
+        table.append("<td>"+ snapshot.val().name + "</td>");
+        table.append("<td>"+ snapshot.val().destination + "</td>");
+        table.append("<td>"+ snapshot.val().time + "</td>");
+        table.append("<td>"+ snapshot.val().frequency + "</td>");
+        $("#table").append(table);
+
+
+    });
+
     // Event listener for submit button
     // When submit button is clicked, user entered values are updated to DOM
     $("#submit").on("click",function(event){
@@ -23,16 +35,15 @@ $(document).ready(function(){
     var time = $("#input-time").val();
     var freq = $("#input-freq").val();
 
-    var table = $("<tr>");
-    table.append("<td>"+ name + "</td>");
-    table.append("<td>"+ dest + "</td>");
-    table.append("<td>"+ time + "</td>");
-    table.append("<td>"+ freq + "</td>");
-    $("#table").append(table);
-    // $("#display").append(name);
-    // $("#display").append(dest);
-    // $("#display").append(time);
-    // $("#display").append(freq);
+
+    
+    database.ref().push({
+        name : name,
+        destination : dest,
+        time : time,
+        frequency : freq
+
+    });
 
     console.log(name);
     console.log(dest);
