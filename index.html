@@ -7,12 +7,13 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     <script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-database.js"></script>
     <title>Train Schedule</title>
   </head>
-  <body>
+  <body background="assets/images/bg.jpg">
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -46,10 +47,17 @@
                 </div>
                 <div class="card-body">
                     <div class="content"id="display">
+                        <!-- <button type="button" class="btn btn-default btn-lg">
+                            <span class="glyphicon glyphicon-star d-none"></span> 
+                          </button> -->
+                          <div class="card-body text-white bg-dark">
+                              Current Time : <span id="sysTime"></span>
+                            </div>
 
                             <table class="table">
                                     <thead>
                                       <tr>
+                                          <th scope="col"></th>
                                         <th scope="col">Train Name</th>
                                         <th scope="col">Destination</th>
                                         <th scope="col">Frequency (min)</th>
@@ -62,6 +70,7 @@
                                       <!-- Train schedules are appended here -->
                                     </tbody>
                                   </table>
+                                <p id="SystemTime"></p>
 
 
 

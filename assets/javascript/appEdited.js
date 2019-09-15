@@ -15,33 +15,15 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var database = firebase.database();
 
-
 $(document).ready(function(){
-    setInterval(getSystemTime,1000);
-
-    function getSystemTime(){
-        // var now = new Date();
-        // console.log(now);
-        // now = Date();
-         now = new moment().format("HH:mm");
-        // console.log("Is now here?");
-        // console.log(now);
-        $("#sysTime").text(now);
-        // database.ref("/systemTime").set({
-        //     now : now
     
-        // });
-    
-    }
-    
-    database.ref().on("child_added",function(snapshot){
-        // console.log("On value ca]haneg");
+    database.ref("/trainUpdate"+i).on("child_added",function(snapshot){
+        i++;
+        console.log("On value ca]haneg");
         console.log("Snapshot : "+snapshot.val().name);
          table = $("<tr>");
          table.attr("id","tableId");
-        table.attr("data-row",i);
         // table.append(.glyphicon);
-        table.append("<button class='btn bg-dark'id='trashBtn'data-toggle='tooltip'data-placement='side'title='Deletes from chosen list'><i class='fa fa-trash'></i></button>");
         table.append("<td>"+ snapshot.val().name + "</td>");
         table.append("<td>"+ snapshot.val().destination + "</td>");
         // table.append("<td>"+ snapshot.val().time + "</td>");
@@ -49,31 +31,20 @@ $(document).ready(function(){
         table.append("<td>"+ snapshot.val().nextArrival + "</td>");
         table.append("<td id='minsAwayDom'>"+ snapshot.val().minutesAway + "</td>");
         $("#table").append(table);
-        // i++;
     });
 
-    // On click on trash button removes train details from website
-    $(document).on("click","#trashBtn",function(e){
-        console.log("Inside trash function");
-        e.preventDefault();
-        // $(this).attr("data-row").remove();
-        $("#tableId").remove();
-        // var ref = new Firebase("https://console.firebase.google.com/u/0/project/first-project-59ca2/database/first-project-59ca2/data");
-        // database.ref().child(currentTime).remove();
+    // database.ref("/trainUpdate"+i).on("child_added",function(snap){
+    //     console.log("Inside value change");
+    //     console.log(snap.val().minutesAway);
+    //     document.getElementById("minsAwayDom").innerHTML = snap.val().minutesAway;
 
-    });
-
-    // database.ref().on('child_removed', function (snapshot) {
-    //     // removed!
-    //     $("#tableId").remove();
-    // })
-
+    // });
     
     // Event listener for submit button
     // When submit button is clicked, user entered values are updated to DOM
     $("#submit").on("click",function(event){
     event.preventDefault();
-    // setInterval(getSystemTime, 3000);
+    setInterval(getSystemTime, 3000);
     console.log("submit button clicked");
     var name = $("#input-name").val();
     var dest = $("#input-dest").val();
@@ -127,18 +98,81 @@ $(document).ready(function(){
     console.log(minutesAway);
     console.log("================================");
 
-    database.ref().push({
+    database.ref("/trainUpdate"+i).push({
         name : name,
         destination : dest,
         time : time,
         frequency : freq,
         currentTime : currentTime,
         nextArrival : nextArrival,
-        minutesAway : minutesAway,
+        minutesAway : minutesAway
+
+    });
+    database.ref("/systemTime").on("value", function(snapshot){
+        
+        console.log("aaaaaaaaaaaaaaaaaa");
+        console.log(snapshot.val().now);
+        $("#SystemTime").text(snapshot.val().now);
+        // var newTimeMins = moment(nextArrival, "mm");
+        // var newTimeHrs = moment(nextArrival, "HH");
+        var newTimeHrs = moment(nextArrival, 'hh:mm A').diff(moment().startOf('day'), 'hours');
+        var newTimeMins = moment(nextArrival, 'hh:mm A').diff(moment().startOf('day'), 'minutes');
+        console.log("new time hpurs");
+        console.log(newTimeHrs);
+        console.log("new time minuyes");
+        console.log(newTimeMins);
+        console.log("Now ?");
+        var now = new moment().format("HH:mm");
+        console.log(now);
+        var nowMins = moment(now, 'HH:mm').diff(moment().startOf('day'), 'minutes');
+        var nowHrs = new moment().format("HH");
+        console.log("parse int next arrival"); 
+        console.log(parseInt(newTimeMins)); //crct //780
+        console.log("parse int now");
+        console.log(parseInt(nowMins)); //crct //776
+        // while(nowHrs == newTimeHrs && nowMins == newTimeMins){
+        if(parseInt(newTimeMins) != parseInt(nowMins)){
+            console.log("inside first if");
+        minutesAway = newTimeMins - nowMins;
+        console.log("after subtraction minutes away");
+        console.log(minutesAway);
+        database.ref("/trainUpdate"+i).push({
+            name : name,
+            destination : dest,
+            time : time,
+            frequency : freq,
+            currentTime : currentTime,
+            nextArrival : nextArrival,
+            minutesAway : minutesAway
+        });
+        }
+        if(parseInt(newTimeMins) === parseInt(nowMins)){
+            minutesAway = 0;
+            database.ref("/'trainUpdate'+i/minutesAway").set({
+                minutesAway : minutesAway
+            });
+        }
+    });
+
+    console.log(name);
+    console.log(dest);
+    console.log(time);
+    console.log(freq);
+});
+})  
+
+function getSystemTime(){
+    // var now = new Date();
+    // console.log(now);
+    // now = Date();
+    var now = new moment().format("HH:mm");
+    console.log("Is now here?");
+    console.log(now);
+    // $("#SystemTime").text(now);
+    // var value = "Hi this is mahisha";
+    database.ref("/systemTime").set({
         now : now
 
     });
-});
 
-});
-
+}
