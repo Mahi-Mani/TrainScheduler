@@ -2,6 +2,20 @@
 var now;
 var table;
 var i=0;
+var newTimeMins;
+var nowMins;
+var nextArrival;
+var minutesAway;
+var freq;
+var time;
+var dest;
+var name;
+var currentTime;
+var currentTimemins,
+currentTimeHrs,
+currentMins,
+newTime;
+var minutesAwayArr = [];
 var firebaseConfig = {
     apiKey: "AIzaSyCgilnIosgu4U2AIXTmDjVz0NgtUs1LEA8",
     authDomain: "first-project-59ca2.firebaseapp.com",
@@ -20,13 +34,11 @@ $(document).ready(function(){
     setInterval(getSystemTime,1000);
 
     function getSystemTime(){
-        // var now = new Date();
-        // console.log(now);
-        // now = Date();
          now = new moment().format("HH:mm");
         // console.log("Is now here?");
         // console.log(now);
         $("#sysTime").text(now);
+        change();
         // database.ref("/systemTime").set({
         //     now : now
     
@@ -53,6 +65,7 @@ $(document).ready(function(){
     });
 
     // On click on trash button removes train details from website
+    
     $(document).on("click","#trashBtn",function(e){
         console.log("Inside trash function");
         e.preventDefault();
@@ -71,25 +84,28 @@ $(document).ready(function(){
     
     // Event listener for submit button
     // When submit button is clicked, user entered values are updated to DOM
-    $("#submit").on("click",function(event){
+    // function getSystemTime(){
+    $("#submit").on("click",function (event){
     event.preventDefault();
+    now = new moment().format("HH:mm");
+    $("#sysTime").text(now);
     // setInterval(getSystemTime, 3000);
     console.log("submit button clicked");
-    var name = $("#input-name").val();
-    var dest = $("#input-dest").val();
-    var time = $("#input-time").val();
-    var freq = $("#input-freq").val();
-    var currentTime = new moment().format("HH:mm");
+    name = $("#input-name").val();
+    dest = $("#input-dest").val();
+    time = $("#input-time").val();
+    freq = $("#input-freq").val();
+    currentTime = new moment().format("HH:mm");
     // var newcurrentTime = moment(currentTime,"HH:mm");
     // console.log(newcurrentTime);
-    var currentTimemins = new moment().format("mm");
-    var currentTimeHrs = new moment().format("HH");
+    currentTimemins = new moment().format("mm");
+    currentTimeHrs = new moment().format("HH");
     console.log(currentTimemins);
     console.log(currentTimeHrs);
-    var currentMins = parseInt(currentTimemins) + parseInt((currentTimeHrs * 60));
+    currentMins = parseInt(currentTimemins) + parseInt((currentTimeHrs * 60));
     console.log(currentMins);
     console.log(time);
-    var newTime = moment(time, "HH:mm");
+    newTime = moment(time, "HH:mm");
 
     if(currentTime > time){
     var start = moment.duration(currentTime, "HH:mm");
@@ -121,11 +137,15 @@ $(document).ready(function(){
         var nextTrain = moment(nextTrainMins,"HH:mm");
     }
     console.log("1111111111111111111");
-    var nextArrival = moment.utc().startOf('day').add(nextTrainMins, 'minutes').format('hh:mm A');
-    var minutesAway = nextTrainMins - currentMins;
+    nextArrival = moment.utc().startOf('day').add(nextTrainMins, 'minutes').format('hh:mm A');
+    minutesAway = nextTrainMins - currentMins;
     console.log(nextArrival);
     console.log(minutesAway);
     console.log("================================");
+
+
+    // database.ref().on("value",function(snap){
+
 
     database.ref().push({
         name : name,
@@ -138,7 +158,50 @@ $(document).ready(function(){
         now : now
 
     });
-});
+
 
 });
+
+var systemTime = document.getElementById("sysTime");
+console.log("System time");
+console.log(systemTime);
+// $("body").on("domChanged",function(){
+    // systemTime.onchange = function(){
+        function change(){
+    console.log("Hi");
+    newTimeMins = moment(nextArrival, 'hh:mm A').diff(moment().startOf('day'), 'minutes');
+    nowMins = moment(now, 'HH:mm').diff(moment().startOf('day'), 'minutes');
+if(parseInt(newTimeMins) != parseInt(nowMins)){
+    console.log("inside first if");
+minutesAway = newTimeMins - nowMins;
+console.log("after subtraction minutes away");
+console.log(newTimeMins);
+console.log(now);
+console.log(nowMins);
+console.log(minutesAway);
+}
+
+if(parseInt(newTimeMins) === parseInt(nowMins)){
+    minutesAway = 0;
+}
+console.log("time change :");
+console.log(minutesAway);
+// database.ref().push({
+//     name : name,
+//     destination : dest,
+//     time : time,
+//     frequency : freq,
+//     currentTime : currentTime,
+//     nextArrival : nextArrival,
+//     minutesAway : minutesAway,
+//     now : now
+
+// });
+
+
+    }
+
+});
+
+
 

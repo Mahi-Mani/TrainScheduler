@@ -2,6 +2,28 @@
 var now;
 var table;
 var i=0;
+var newTimeMins;
+var nowMins;
+var nextArrival;
+var minutesAway;
+var freq;
+var time;
+var dest;
+var name;
+var currentTime;
+var currentTimemins,
+currentTimeHrs,
+currentMins,
+newTime;
+var minutesAwayArr = [];
+var nameArr = [];
+var destArr = [];
+var freqArr = [];
+var timeArr = [];
+var newTimeMinsArr = [];
+var nowMinsArr = [];
+var nextArrivalArr = [];
+
 var firebaseConfig = {
     apiKey: "AIzaSyCgilnIosgu4U2AIXTmDjVz0NgtUs1LEA8",
     authDomain: "first-project-59ca2.firebaseapp.com",
@@ -15,15 +37,31 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var database = firebase.database();
 
+
 $(document).ready(function(){
+    setInterval(getSystemTime,1000);
+
+    function getSystemTime(){
+         now = new moment().format("HH:mm");
+        // console.log("Is now here?");
+        // console.log(now);
+        $("#sysTime").text(now);
+        change();
+        // database.ref("/systemTime").set({
+        //     now : now
     
-    database.ref("/trainUpdate"+i).on("child_added",function(snapshot){
-        i++;
-        console.log("On value ca]haneg");
+        // });
+    
+    }
+    
+    database.ref().on("child_added",function(snapshot){
+        // console.log("On value ca]haneg");
         console.log("Snapshot : "+snapshot.val().name);
          table = $("<tr>");
          table.attr("id","tableId");
+        table.attr("data-row",i);
         // table.append(.glyphicon);
+        table.append("<button class='btn bg-dark'id='trashBtn'data-toggle='tooltip'data-placement='side'title='Deletes from chosen list'><i class='fa fa-trash'></i></button>");
         table.append("<td>"+ snapshot.val().name + "</td>");
         table.append("<td>"+ snapshot.val().destination + "</td>");
         // table.append("<td>"+ snapshot.val().time + "</td>");
@@ -31,36 +69,51 @@ $(document).ready(function(){
         table.append("<td>"+ snapshot.val().nextArrival + "</td>");
         table.append("<td id='minsAwayDom'>"+ snapshot.val().minutesAway + "</td>");
         $("#table").append(table);
+        // i++;
     });
 
-    // database.ref("/trainUpdate"+i).on("child_added",function(snap){
-    //     console.log("Inside value change");
-    //     console.log(snap.val().minutesAway);
-    //     document.getElementById("minsAwayDom").innerHTML = snap.val().minutesAway;
+    // On click on trash button removes train details from website
+    
+    $(document).on("click","#trashBtn",function(e){
+        console.log("Inside trash function");
+        e.preventDefault();
+        // $(this).attr("data-row").remove();
+        $("#tableId").remove();
+        // var ref = new Firebase("https://console.firebase.google.com/u/0/project/first-project-59ca2/database/first-project-59ca2/data");
+        // database.ref().child(currentTime).remove();
 
-    // });
+    });
+
+    // database.ref().on('child_removed', function (snapshot) {
+    //     // removed!
+    //     $("#tableId").remove();
+    // })
+
     
     // Event listener for submit button
     // When submit button is clicked, user entered values are updated to DOM
-    $("#submit").on("click",function(event){
+    // function getSystemTime(){
+    $("#submit").on("click",function (event){
     event.preventDefault();
-    setInterval(getSystemTime, 3000);
+    now = new moment().format("HH:mm");
+    $("#sysTime").text(now);
+    // setInterval(getSystemTime, 3000);
     console.log("submit button clicked");
-    var name = $("#input-name").val();
-    var dest = $("#input-dest").val();
-    var time = $("#input-time").val();
-    var freq = $("#input-freq").val();
-    var currentTime = new moment().format("HH:mm");
+    name = $("#input-name").val();
+    dest = $("#input-dest").val();
+    time = $("#input-time").val();
+    freq = $("#input-freq").val();
+    currentTime = new moment().format("HH:mm");
     // var newcurrentTime = moment(currentTime,"HH:mm");
     // console.log(newcurrentTime);
-    var currentTimemins = new moment().format("mm");
-    var currentTimeHrs = new moment().format("HH");
+    currentTimemins = new moment().format("mm");
+    currentTimeHrs = new moment().format("HH");
     console.log(currentTimemins);
     console.log(currentTimeHrs);
-    var currentMins = parseInt(currentTimemins) + parseInt((currentTimeHrs * 60));
+    currentMins = parseInt(currentTimemins) + parseInt((currentTimeHrs * 60));
     console.log(currentMins);
     console.log(time);
-    var newTime = moment(time, "HH:mm");
+    newTime = moment(time, "HH:mm");
 
     if(currentTime > time){
     var start = moment.duration(currentTime, "HH:mm");
@@ -92,87 +145,98 @@ $(document).ready(function(){
         var nextTrain = moment(nextTrainMins,"HH:mm");
     }
     console.log("1111111111111111111");
-    var nextArrival = moment.utc().startOf('day').add(nextTrainMins, 'minutes').format('hh:mm A');
-    var minutesAway = nextTrainMins - currentMins;
+    nextArrival = moment.utc().startOf('day').add(nextTrainMins, 'minutes').format('hh:mm A');
+    minutesAway = nextTrainMins - currentMins;
     console.log(nextArrival);
     console.log(minutesAway);
     console.log("================================");
 
-    database.ref("/trainUpdate"+i).push({
+
+    // database.ref().on("value",function(snap){
+        pushToArray();
+
+
+    database.ref().push({
         name : name,
         destination : dest,
         time : time,
         frequency : freq,
         currentTime : currentTime,
         nextArrival : nextArrival,
-        minutesAway : minutesAway
-
-    });
-    database.ref("/systemTime").on("value", function(snapshot){
-        
-        console.log("aaaaaaaaaaaaaaaaaa");
-        console.log(snapshot.val().now);
-        $("#SystemTime").text(snapshot.val().now);
-        // var newTimeMins = moment(nextArrival, "mm");
-        // var newTimeHrs = moment(nextArrival, "HH");
-        var newTimeHrs = moment(nextArrival, 'hh:mm A').diff(moment().startOf('day'), 'hours');
-        var newTimeMins = moment(nextArrival, 'hh:mm A').diff(moment().startOf('day'), 'minutes');
-        console.log("new time hpurs");
-        console.log(newTimeHrs);
-        console.log("new time minuyes");
-        console.log(newTimeMins);
-        console.log("Now ?");
-        var now = new moment().format("HH:mm");
-        console.log(now);
-        var nowMins = moment(now, 'HH:mm').diff(moment().startOf('day'), 'minutes');
-        var nowHrs = new moment().format("HH");
-        console.log("parse int next arrival"); 
-        console.log(parseInt(newTimeMins)); //crct //780
-        console.log("parse int now");
-        console.log(parseInt(nowMins)); //crct //776
-        // while(nowHrs == newTimeHrs && nowMins == newTimeMins){
-        if(parseInt(newTimeMins) != parseInt(nowMins)){
-            console.log("inside first if");
-        minutesAway = newTimeMins - nowMins;
-        console.log("after subtraction minutes away");
-        console.log(minutesAway);
-        database.ref("/trainUpdate"+i).push({
-            name : name,
-            destination : dest,
-            time : time,
-            frequency : freq,
-            currentTime : currentTime,
-            nextArrival : nextArrival,
-            minutesAway : minutesAway
-        });
-        }
-        if(parseInt(newTimeMins) === parseInt(nowMins)){
-            minutesAway = 0;
-            database.ref("/'trainUpdate'+i/minutesAway").set({
-                minutesAway : minutesAway
-            });
-        }
-    });
-
-    console.log(name);
-    console.log(dest);
-    console.log(time);
-    console.log(freq);
-});
-})  
-
-function getSystemTime(){
-    // var now = new Date();
-    // console.log(now);
-    // now = Date();
-    var now = new moment().format("HH:mm");
-    console.log("Is now here?");
-    console.log(now);
-    // $("#SystemTime").text(now);
-    // var value = "Hi this is mahisha";
-    database.ref("/systemTime").set({
+        minutesAway : minutesAway,
         now : now
 
     });
+    i++;
 
+
+});
+
+function pushToArray(){
+    nameArr.push(name);
+    destArr.push(dest);
+    freqArr.push(freq);
+    minutesAwayArr.push(minutesAway);
+    nextArrivalArr.push(nextArrival);
+    timeArr.push(time);
 }
+
+var systemTime = document.getElementById("sysTime");
+console.log("System time");
+console.log(systemTime);
+// $("body").on("domChanged",function(){
+    // systemTime.onchange = function(){
+        function change(){
+    console.log("Hi");
+    for(i=0; i<nameArr.length; i++){
+    newTimeMinsArr[i] = moment(nextArrivalArr[i], 'hh:mm A').diff(moment().startOf('day'), 'minutes');
+    nowMinsArr[i] = moment(now, 'HH:mm').diff(moment().startOf('day'), 'minutes');
+if(parseInt(newTimeMinsArr[i]) != parseInt(nowMinsArr[i])){
+    console.log("inside first if");
+minutesAwayArr[i] = newTimeMinsArr[i] - nowMinsArr[i];
+console.log("after subtraction minutes away");
+console.log(newTimeMinsArr[i]);
+console.log(now);
+console.log(nowMinsArr[i]);
+console.log(minutesAwayArr[i]);
+}
+
+if(parseInt(newTimeMinsArr[i]) === parseInt(nowMinsArr[i])){
+    minutesAwayArr[i] = 0;
+}
+console.log("time change :");
+console.log(minutesAwayArr[i]);
+// $("#minsAwayDom").html(minutesAwayArr[i]);
+table.html("<td id='minsAwayDom'>"+ "</td>");
+table = $("<tr>");
+table.attr("id","tableId");
+table.attr("data-row",i);
+// table.append(.glyphicon);
+table.append("<button class='btn bg-dark'id='trashBtn'data-toggle='tooltip'data-placement='side'title='Deletes from chosen list'><i class='fa fa-trash'></i></button>");
+table.append("<td>"+ nameArr[i] + "</td>");
+table.append("<td>"+ destArr[i] + "</td>");
+// table.append("<td>"+ snapshot.val().time + "</td>");
+table.append("<td>"+ freqArr[i] + "</td>");
+table.append("<td>"+ nextArrivalArr[i] + "</td>");
+table.append("<td id='minsAwayDom'>"+ minutesAwayArr[i] + "</td>");
+$("#table").append(table);
+// database.ref().push({
+//     name : name,
+//     destination : dest,
+//     time : time,
+//     frequency : freq,
+//     currentTime : currentTime,
+//     nextArrival : nextArrival,
+//     minutesAway : minutesAway,
+//     now : now
+
+// });
+    }
+
+
+    }
+
+});
+
+
+
