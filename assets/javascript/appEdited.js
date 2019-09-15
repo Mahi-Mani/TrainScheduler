@@ -57,7 +57,9 @@ $(document).ready(function(){
     database.ref().on("child_added",function(snapshot){
         // console.log("On value ca]haneg");
         console.log("Snapshot : "+snapshot.val().name);
-         table = $("<tr>");
+        readDatabase(snapshot);
+        var table = $("<tr>");
+        // $('#table tr[data-row="'+i+'"]').remove();
          table.attr("id","tableId");
         table.attr("data-row",i);
         // table.append(.glyphicon);
@@ -68,9 +70,24 @@ $(document).ready(function(){
         table.append("<td>"+ snapshot.val().frequency + "</td>");
         table.append("<td>"+ snapshot.val().nextArrival + "</td>");
         table.append("<td id='minsAwayDom'>"+ snapshot.val().minutesAway + "</td>");
+        // $("#table").append("<br>");
         $("#table").append(table);
+        
+        
         // i++;
     });
+
+    function readDatabase(snapshot){
+        nameArr.push(snapshot.val().name);
+        destArr.push(snapshot.val().destination);
+        freqArr.push(snapshot.val().frequency);
+        minutesAwayArr.push(snapshot.val().minutesAway);
+        nextArrivalArr.push(snapshot.val().nextArrival);
+        timeArr.push(snapshot.val().time);
+
+
+    }
+
 
     // On click on trash button removes train details from website
     
@@ -155,30 +172,33 @@ $(document).ready(function(){
     // database.ref().on("value",function(snap){
         pushToArray();
 
-
+    // for(i=0; i<nameArr.length; i++){
     database.ref().push({
-        name : name,
-        destination : dest,
-        time : time,
-        frequency : freq,
+        name : nameArr[i],
+        destination : destArr[i],
+        time : timeArr[i],
+        frequency : freqArr[i],
         currentTime : currentTime,
-        nextArrival : nextArrival,
-        minutesAway : minutesAway,
+        nextArrival : nextArrivalArr[i],
+        minutesAway : minutesAwayArr[i],
         now : now
 
     });
+// }
     i++;
 
 
 });
 
 function pushToArray(){
+    if(!(nameArr.includes(name))){
     nameArr.push(name);
     destArr.push(dest);
     freqArr.push(freq);
     minutesAwayArr.push(minutesAway);
     nextArrivalArr.push(nextArrival);
     timeArr.push(time);
+    }
 }
 
 var systemTime = document.getElementById("sysTime");
@@ -189,6 +209,7 @@ console.log(systemTime);
         function change(){
     console.log("Hi");
     for(i=0; i<nameArr.length; i++){
+        console.log("First fot loop : "+nameArr);
     newTimeMinsArr[i] = moment(nextArrivalArr[i], 'hh:mm A').diff(moment().startOf('day'), 'minutes');
     nowMinsArr[i] = moment(now, 'HH:mm').diff(moment().startOf('day'), 'minutes');
 if(parseInt(newTimeMinsArr[i]) != parseInt(nowMinsArr[i])){
@@ -206,9 +227,23 @@ if(parseInt(newTimeMinsArr[i]) === parseInt(nowMinsArr[i])){
 }
 console.log("time change :");
 console.log(minutesAwayArr[i]);
+
+// if(minutesAwayArr[i] === 0){
+//     newTimeMinsArr[i] = newTimeMinsArr[i] + freqArr[i];
+//     nextArrivalArr[i] = moment(newTimeMinsArr[i], 'minutes').diff(moment().startOf('day'), 'hh:mm A');
+
+// }
+    }
 // $("#minsAwayDom").html(minutesAwayArr[i]);
-table.html("<td id='minsAwayDom'>"+ "</td>");
-table = $("<tr>");
+// table.remove();
+for(i=0; i<nameArr.length; i++){
+    console.log("Second for loop : "+nameArr);
+    
+    
+// table.remove();
+$('#table tr[data-row="'+i+'"]').remove();
+console.log("Second for loop after remove() : "+nameArr);
+var table = $("<tr>");
 table.attr("id","tableId");
 table.attr("data-row",i);
 // table.append(.glyphicon);
@@ -220,14 +255,14 @@ table.append("<td>"+ freqArr[i] + "</td>");
 table.append("<td>"+ nextArrivalArr[i] + "</td>");
 table.append("<td id='minsAwayDom'>"+ minutesAwayArr[i] + "</td>");
 $("#table").append(table);
-// database.ref().push({
-//     name : name,
-//     destination : dest,
-//     time : time,
-//     frequency : freq,
+// database.-{
+//     name : nameArr[i],
+//     destination : destArr[i],
+//     time : timeArr[i],
+//     frequency : freqArr[i],
 //     currentTime : currentTime,
-//     nextArrival : nextArrival,
-//     minutesAway : minutesAway,
+//     nextArrival : nextArrivalArr[i],
+//     minutesAway : minutesAwayArr[i],
 //     now : now
 
 // });
