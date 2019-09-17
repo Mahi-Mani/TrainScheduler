@@ -9,7 +9,7 @@
 - Bootstrap  : Styles html elements on page
 - Javascript : used to provide interative effects
 - JQuery : event handling, DOM manipulation
-  Firebase : Used database to store datas
+- Firebase : Used database to store datas
 - Git : version control system to track changes to source code
 - GitHub : hosts repository that can be deployed to GitHub pages
 
