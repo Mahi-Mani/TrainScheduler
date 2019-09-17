@@ -1,0 +1,216 @@
+// last edit made
+// Firebase
+var now;
+var table;
+var i=0;
+var newTimeMins;
+var nowMins;
+var nextArrival;
+var minutesAway;
+var freq;
+var time;
+var dest;
+var name;
+var currentTime;
+var currentTimemins,
+currentTimeHrs,
+currentMins,
+newTime;
+var rowCount;
+var minutesAwayArr = [];
+var nameArr = [];
+var destArr = [];
+var freqArr = [];
+var timeArr = [];
+var newTimeMinsArr = [];
+var nowMinsArr = [];
+var nextArrivalArr = [];
+
+var firebaseConfig = {
+    apiKey: "AIzaSyCgilnIosgu4U2AIXTmDjVz0NgtUs1LEA8",
+    authDomain: "first-project-59ca2.firebaseapp.com",
+    databaseURL: "https://first-project-59ca2.firebaseio.com",
+    projectId: "first-project-59ca2",
+    storageBucket: "",
+    messagingSenderId: "1062645255683",
+    appId: "1:1062645255683:web:e42a220dbae93c569e0836"
+    };
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+var database = firebase.database();
+
+
+$(document).ready(function(){
+    setInterval(getSystemTime,1000);
+
+    function getSystemTime(){
+         now = new moment().format("HH:mm");
+        $("#sysTime").text(now);
+        change();
+    }
+    
+    database.ref().on("child_added",function(snapshot){
+     
+        var table = $("<tr>");
+        // $('#table tr[data-row="'+i+'"]').remove();
+         table.attr("id","tableId");
+        table.attr("data-row",i);
+        // table.append(.glyphicon);
+        table.append("<button class='btn bg-dark'id='trashBtn'data-toggle='tooltip'data-placement='side'title='Deletes from chosen list'><i class='fa fa-trash'></i></button>");
+        table.append("<td>"+ snapshot.val().name + "</td>");
+        table.append("<td>"+ snapshot.val().destination + "</td>");
+        // table.append("<td>"+ snapshot.val().time + "</td>");
+        table.append("<td>"+ snapshot.val().frequency + "</td>");
+        table.append("<td>"+ snapshot.val().nextArrival + "</td>");
+        table.append("<td id='minsAwayDom'>"+ snapshot.val().minutesAway + "</td>");
+        // $("#table").append("<br>");
+        $("#table").append(table);
+        readDatabase(snapshot);
+        rowCount = document.getElementById("tableDetails").rows.length;
+    });
+
+    function readDatabase(snapshot){  
+        nameArr.push(snapshot.val().name);
+        destArr.push(snapshot.val().destination);
+        freqArr.push(snapshot.val().frequency);
+        minutesAwayArr.push(snapshot.val().minutesAway);
+        nextArrivalArr.push(snapshot.val().nextArrival);
+        timeArr.push(snapshot.val().time);
+    }
+
+
+    // On click on trash button removes train details from website
+    
+    $(document).on("click","#trashBtn",function(e){
+        e.preventDefault();
+        // $(this).attr("data-row").remove();
+        $("#tableId").remove();
+        // var ref = new Firebase("https://console.firebase.google.com/u/0/project/first-project-59ca2/database/first-project-59ca2/data");
+        // database.ref().child(currentTime).remove();
+
+    });
+
+    // Event listener for submit button
+    // When submit button is clicked, user entered values are updated to DOM
+    $("#submit").on("click",function (event){
+    event.preventDefault();
+    now = new moment().format("HH:mm");
+    $("#sysTime").text(now);
+    // setInterval(getSystemTime, 3000);
+    name = $("#input-name").val();
+    dest = $("#input-dest").val();
+    time = $("#input-time").val();
+    freq = $("#input-freq").val();
+    
+    timeCalc();
+    pushToDatabase();
+});
+function pushToDatabase(){
+    database.ref().push({
+        name : name,
+        destination : dest,
+        time : time,
+        frequency : freq,
+        currentTime : currentTime,
+        nextArrival : nextArrival,
+        minutesAway : minutesAway,
+        now : now
+
+    });
+}
+
+var systemTime = document.getElementById("sysTime");
+
+function change(){
+    console.log("change called");
+    // timeCalc();
+    for(i=0; i<nameArr.length; i++){
+        newTimeMinsArr[i] = moment(nextArrivalArr[i], 'hh:mm A').diff(moment().startOf('day'), 'minutes');
+        nowMinsArr[i] = moment(now, 'HH:mm').diff(moment().startOf('day'), 'minutes');
+        if(parseInt(newTimeMinsArr[i]) < parseInt(nowMinsArr[i])){
+            if(parseInt(minutesAwayArr[i])>=0){
+            minutesAwayArr[i] = newTimeMinsArr[i] - nowMinsArr[i];
+            }
+            else if(parseInt(minutesAwayArr[i]) < 0){
+            newTimeMinsArr[i] = nowMinsArr[i] + freqArr[i];
+            nextArrivalArr[i] = moment.utc().startOf('day').add(newTimeMinsArr[i], 'minutes').format('hh:mm A');
+            minutesAwayArr[i] = freqArr[i];
+        }
+    }
+        if(parseInt(newTimeMinsArr[i]) === parseInt(nowMinsArr[i])){
+            minutesAwayArr[i] = "Your train has arrived";  
+
+            }
+    }
+
+    constructTable();
+    }
+    function constructTable(){
+        for(i=0; i<nameArr.length; i++){     
+
+            $('#table tr[data-row="'+i+'"]').remove();
+    
+            var table = $("<tr>");
+            table.attr("id","tableId");
+            table.attr("data-row",i);
+            // table.append(.glyphicon);
+            table.append("<button class='btn bg-dark'id='trashBtn'data-toggle='tooltip'data-placement='side'title='Deletes from chosen list'><i class='fa fa-trash'></i></button>");
+            table.append("<td>"+ nameArr[i] + "</td>");
+            table.append("<td>"+ destArr[i] + "</td>");
+            // table.append("<td>"+ snapshot.val().time + "</td>");
+            table.append("<td>"+ freqArr[i] + "</td>");
+            table.append("<td>"+ nextArrivalArr[i] + "</td>");
+            table.append("<td id='minsAwayDom'>"+ minutesAwayArr[i] + "</td>");
+            $("#table").append(table);
+
+            }
+    }
+
+    function timeCalc(){
+        currentTime = new moment().format("HH:mm");
+        // var newcurrentTime = moment(currentTime,"HH:mm");
+        currentTimemins = new moment().format("mm");
+        currentTimeHrs = new moment().format("HH");
+        currentMins = parseInt(currentTimemins) + parseInt((currentTimeHrs * 60));
+        newTime = moment(time, "HH:mm");
+    
+        if(freq > 1){
+        if(currentTime > time){
+        var start = moment.duration(currentTime, "HH:mm");
+        var end = moment.duration(time, "HH:mm");
+        }
+        else{
+         end = moment.duration(currentTime, "HH:mm");
+         start = moment.duration(time, "HH:mm");
+    
+        }
+    
+        var diff = start.subtract(end);
+        var hours = diff.hours(); // return hours
+        var minutes = diff.minutes(); // return minutes
+        var diffInMins = minutes + (hours * 60);
+        var x = diffInMins % freq;
+        if(x === 0){
+            var nextTrainMins = currentMins + freq;
+            var nextTrain = moment(nextTrainMins,"HH:mm");
+        }
+        if(x>0){
+            nextTrainMins = freq - x;
+            nextTrainMins = parseInt(nextTrainMins) + parseInt(currentMins);
+            var nextTrain = moment(nextTrainMins,"HH:mm");
+        }
+        nextArrival = moment.utc().startOf('day').add(nextTrainMins, 'minutes').format('hh:mm A');
+        minutesAway = nextTrainMins - currentMins;
+    }
+    else {
+        nextTrainMins = currentMins + 1;
+        freq = 1;
+        nextArrival = moment.utc().startOf('day').add(nextTrainMins, 'minutes').format('hh:mm A');
+        minutesAway = 1;
+    }
+    }
+
+});
+
+
+
