@@ -171,7 +171,7 @@ function change(){
         var table = $("<tr>");
         table.attr("id","tableId");
         table.attr("data-row",i);
-        table.append("<button class='btn bg-dark'id='trashBtn'data-toggle='tooltip'data-placement='side'title='Deletes from chosen list'><i class='fa fa-trash'></i></button>");
+        // table.append("<button class='btn bg-dark'id='trashBtn'data-toggle='tooltip'data-placement='side'title='Deletes from chosen list'><i class='fa fa-trash'></i></button>");
         table.append("<td>"+ nameArr[i] + "</td>");
         table.append("<td>"+ destArr[i] + "</td>");
         table.append("<td>"+ freqArr[i] + "</td>");
