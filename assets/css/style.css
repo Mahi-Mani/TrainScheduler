@@ -20,7 +20,13 @@
     background-color: RoyalBlue;
   }
   body{
-    background-size: 1600px 1600px;
+    background-size: 1650px 1650px;
+    background-repeat:no-repeat;
+  -webkit-background-size:cover;
+  -moz-background-size:cover;
+  -o-background-size:cover;
+  background-size:cover;
+  background-position:center;
   }
   #tableDetails{
     color:white;
